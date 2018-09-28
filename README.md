@@ -1,4 +1,4 @@
-ember-rdfa-editor-template-variables-manager-plugin
+@lblod/ember-rdfa-editor-template-variables-manager-plugin
 ==============================================================================
 
 [Short description of the addon.]
@@ -7,7 +7,7 @@ Installation
 ------------------------------------------------------------------------------
 
 ```
-ember install ember-rdfa-editor-template-variables-manager-plugin
+ember install @lblod/ember-rdfa-editor-template-variables-manager-plugin
 ```
 
 
