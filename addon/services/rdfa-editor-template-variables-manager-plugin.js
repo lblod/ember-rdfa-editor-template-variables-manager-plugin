@@ -136,6 +136,40 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
   getVariableDomInstance(domRdfaVariable){
     let domId =  [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:idInSnippet').innerText;
     return document.querySelectorAll(`[id='${domId}']`)[0];
+  /**
+   * When new template is added, it might contain variableMetaData.
+   * We want to move these nodes to a (dom) MetaDataBlock at the beginning of the document.
+   * @param {Object} editor
+   * @param {Object} domNode containing the centralized meta data block
+   */
+  moveVariableMetaToMetaBlock(editor, variablesBlock){
+    let variables = [ ...editor.rootNode.querySelectorAll("[typeOf='ext:Variable']")];
+    variables = variables.filter(node => !variablesBlock.contains(node));
+
+    variables.forEach(v => {
+      let variableHtml = v.outerHTML;
+      editor.prependChildrenHTML(variablesBlock, variableHtml, false, [ this ]);
+      editor.removeNode(v, [ this ]);
+    });
+  },
+  /**
+   * We want to fetch or create the metadata block in the editor-document.
+   * This will containing the meta data of the variables
+   * @param {Object} editor
+   *
+   * @return {Object} domNode containing the centralized meta data block
+   */
+  fetchOrCreateVariablesBlock(editor){
+    let variablesBlock = [ ...editor.rootNode.querySelectorAll("[property='ext:metadata']")];
+    if(variablesBlock.length > 0){
+      return variablesBlock[0];
+    }
+    return editor.prependChildrenHTML(editor.rootNode,
+                                      `<div class="ext_metadata" contenteditable="false" property="ext:metadata">
+                                       &nbsp;
+                                       </div>`,
+                                      true, [ this ])[0];
+  },
   }
 
 });
