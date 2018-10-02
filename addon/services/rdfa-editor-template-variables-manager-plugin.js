@@ -50,6 +50,9 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
 
     let flatVariableData = this.flatVariableInstanceData(editor);
 
+    if(flatVariableData.length > 0)
+      debugger;
+
     flatVariableData = this.cleanUpNullReferenceVariables(editor, flatVariableData);
 
     flatVariableData = this.syncIntializedVariables(editor, flatVariableData);
@@ -158,7 +161,7 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
    * @return {String}
    */
   getIntentionUri(domRdfaVariable){
-    return [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:intentionUri').innerText;
+    return [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:intentionUri').attributes.content.value;
   },
 
   /**
@@ -193,7 +196,7 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
    * @return {Object} domNode
    */
   getVariableDomInstance(domRdfaVariable){
-    let domId =  [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:idInSnippet').innerText;
+    let domId =  [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:idInSnippet').attributes.content.value;
     return document.querySelectorAll(`[id='${domId}']`)[0];
   },
 
