@@ -1,7 +1,7 @@
 @lblod/ember-rdfa-editor-template-variables-manager-plugin
 ==============================================================================
 
-[Short description of the addon.]
+Plugin responsible for managing template variables.
 
 Installation
 ------------------------------------------------------------------------------
@@ -13,8 +13,35 @@ ember install @lblod/ember-rdfa-editor-template-variables-manager-plugin
 
 Usage
 ------------------------------------------------------------------------------
+Variables are defined in template as:
 
-[Longer description of how to use the addon in apps.]
+```
+<div typeof="ext:Variable" resource="http://variables/1">
+  <div property="ext:idInSnippet">foo</div>
+  <div property="ext:intentionUri">http://person/name</div>
+  <div property="ext:variableState" content="initialized">initialized</div>
+</div>
+<div typeof="http://www.w3.org/ns/person#Person" resource="http://a/random/uri">
+  <div>
+   Name:
+     <span id="foo" property="http://xmlns.com/foaf/0.1/familyName" datatype="http://www.w3.org/2001/XMLSchema#string">
+       John Doe
+     </span>
+  </div>
+</div>
+```
+Notes:
+
+* The variable state should be defined in template as 'intialized'. This will change to 'syncing' once this plugin starts using it.
+* `<div property="ext:intentionUri">http://person/name</div>` is the variable which can occur on multiple places in document.
+* You are in charge of making sure `<div property="ext:idInSnippet">foo</div>` and ` id="foo"` are in sync and unique.
+* `<div property="ext:intentionUri">http://person/name</div>` can be shared across templates
+* Currently, in most of the editor cases, template-plugin will make sure ID's are managed.
+
+In host app:  styles/app.scss:
+```
+@import 'ember-rdfa-editor-template-variables-manager-plugin';
+```
 
 
 Contributing

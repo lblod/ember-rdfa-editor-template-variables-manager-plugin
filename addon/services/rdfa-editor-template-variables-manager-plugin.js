@@ -1,11 +1,13 @@
-import { getOwner } from '@ember/application';
 import Service from '@ember/service';
-import EmberObject, { computed } from '@ember/object';
 import { task, timeout } from 'ember-concurrency';
 import { isArray } from '@ember/array';
 
 /**
- * Service responsible for correct annotation of dates
+ * Service responsible for managing variables in templates.
+ * General implementation notes:
+ * - This plugin will make sure there is a meta data block in the document. Where all variable metadata will be moved.
+ * - This block is not contenteditable and invisible.
+ * - Flow is: look for new variables, move them to block, if new sync them with exisiting variables, update them with newest content.
  *
  * @module editor-template-variables-manager-plugin
  * @class RdfaEditorTemplateVariablesManagerPlugin
@@ -63,10 +65,21 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
 
   }).restartable(),
 
+  /**
+   * Given changed node, find variable instance it belongs to.
+   * @param {Array} [{variableInstance: DomNode}]
+   * @param {Object} DomNode
+   */
   findDomVariableInstanceForchangedNode(variableInstances, changedNode){
     return variableInstances.find(v => v.variableInstance.contains(changedNode));
   },
 
+  /**
+   * Given updated node, update other variable instances.
+   * @param {Object} editor
+   * @param {Array} [ DomNode ]
+   * @param {Object} DomNode with 'ground truth'
+   */
   updateVariableInstances(editor, variablesToUpdate, updatedNode){
     if(variablesToUpdate.length == 0){
       return [];
@@ -95,6 +108,12 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     editor.replaceNodeWithHTML(nodeToUpdate, newNode.outerHTML, false, [ this ]);
   },
 
+  /**
+   * Find all variableInstances and return as list together with some meta data
+   * @param {Object} editor
+   *
+   * @return {Array} [{intentionUri, variableInstance, variabelState, variableMeta}]
+   */
   flatVariableInstanceData(editor){
     let variables = [ ...editor.rootNode.querySelectorAll("[typeOf='ext:Variable']")];
     return variables.map( variable => {
@@ -104,6 +123,12 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     });
   },
 
+  /**
+   * Returns intention-uri of MetaVariableData linked to domnode
+   * @param {Object} domNode
+   *
+   * @return {String}
+   */
   getIntentionUri(domRdfaVariable){
     return [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:intentionUri').innerText;
   },
