@@ -44,7 +44,14 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     if(extraInfo.find(i => i && i.who == "editor-plugins/template-variables-manager-card"))
       return [];
 
+
+    let variablesBlock = this.fetchOrCreateVariablesBlock(editor);
+
+    this.moveVariableMetaToMetaBlock(editor, variablesBlock);
+
     let flatVariableData = this.flatVariableInstanceData(editor);
+
+    flatVariableData = this.syncIntializedVariables(editor, flatVariableData);
 
     contexts.forEach((context) => {
       let richNodes = isArray(context.richNode)? context.richNode : [ context.richNode ];
@@ -118,7 +125,9 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     let variables = [ ...editor.rootNode.querySelectorAll("[typeOf='ext:Variable']")];
     return variables.map( variable => {
       return { intentionUri : this.getIntentionUri(variable),
-               variableInstance: this.getVariableDomInstance(variable)
+               variableInstance: this.getVariableDomInstance(variable),
+               variableState: this.getVariableState(variable),
+               variableMeta: variable
              };
     });
   },
@@ -133,9 +142,42 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     return [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:intentionUri').innerText;
   },
 
+  /**
+   * Returns state of MetaVariableData linked to domnode
+   * @param {Object} domNode
+   *
+   * @return {String}
+   */
+  getVariableState(domRdfaVariable){
+    let variableStateProp = [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:variableState');
+    if(variableStateProp)
+      return variableStateProp.attributes.content.value;
+    return '';
+  },
+
+  /**
+   * Sets state of MetaVariableData linked to domnode
+   * @param {Object} domNode
+   */
+  setVariableState(editor, domRdfaVariable, stateName){
+    let variableStateProp = [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:variableState');
+    if(variableStateProp)
+      editor.replaceNodeWithHTML(variableStateProp,
+                                 `<div property="ext:variableState" content="${stateName}">${stateName}</div>`,
+                                 false, [ this ]);
+  },
+
+  /**
+   * Returns variable dom-instance linked to MetaVariableData
+   * @param {Object} domNode
+   *
+   * @return {Object} domNode
+   */
   getVariableDomInstance(domRdfaVariable){
     let domId =  [...domRdfaVariable.children].find(child => child.attributes.property.value === 'ext:idInSnippet').innerText;
     return document.querySelectorAll(`[id='${domId}']`)[0];
+  },
+
   /**
    * When new template is added, it might contain variableMetaData.
    * We want to move these nodes to a (dom) MetaDataBlock at the beginning of the document.
@@ -152,6 +194,7 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
       editor.removeNode(v, [ this ]);
     });
   },
+
   /**
    * We want to fetch or create the metadata block in the editor-document.
    * This will containing the meta data of the variables
@@ -170,6 +213,33 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
                                        </div>`,
                                       true, [ this ])[0];
   },
+
+
+  /**
+   * When new template is added, the variables arrive in a 'initialized' state.
+   * This means their content should be set with what has previously set in other variables and not the other way around, i.e.
+   * the empty variables update the existing variables to 'null' or whatever their initial content is
+   *
+   * @param {Object} editor
+   * @param {Array} [{intentionUri, variableState, variableInstance, variableMeta}]
+   *
+   * @return {Array} update to date flatVariableData: [{intentionUri, variableState, variableInstance, variableMeta}]
+   */
+  syncIntializedVariables(editor, flatVariableData){
+    let newVariables = flatVariableData.filter(d => d.variableState === 'initialized');
+
+    newVariables.forEach(v => {
+      let baseVariable = flatVariableData
+            .find(d => d.intentionUri == v.intentionUri && d.variableState != 'initialized');
+      if(baseVariable)
+        this.updateVariableInstances(editor, [ v.variableInstance ], baseVariable.variableInstance);
+      this.setVariableState(editor, v.variableMeta, 'syncing');
+    });
+
+    if(newVariables.length > 0)
+      return this.flatVariableInstanceData(editor);
+
+    return flatVariableData;
   }
 
 });
