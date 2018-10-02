@@ -16,9 +16,9 @@ Usage
 Variables are defined in template as:
 
 ```
-<div typeof="ext:Variable" resource="http://variables/1">
-  <div property="ext:idInSnippet">foo</div>
-  <div property="ext:intentionUri">http://person/name</div>
+<div class="ext_variable" typeof="ext:Variable" resource="http://variables/1">
+  <div property="ext:idInSnippet" content="foo">foo</div>
+  <div property="ext:intentionUri" content="http://person/name">http://person/name</div>
   <div property="ext:variableState" content="initialized">initialized</div>
 </div>
 <div typeof="http://www.w3.org/ns/person#Person" resource="http://a/random/uri">
@@ -37,6 +37,7 @@ Notes:
 * You are in charge of making sure `<div property="ext:idInSnippet">foo</div>` and ` id="foo"` are in sync and unique.
 * `<div property="ext:intentionUri">http://person/name</div>` can be shared across templates
 * Currently, in most of the editor cases, template-plugin will make sure ID's are managed.
+* `class="ext_variable"` is optional, but makes your variables invisible
 
 In host app:  styles/app.scss:
 ```
