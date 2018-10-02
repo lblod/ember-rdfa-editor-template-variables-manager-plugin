@@ -33,9 +33,9 @@ Variables are defined in template as:
 Notes:
 
 * The variable state should be defined in template as 'intialized'. This will change to 'syncing' once this plugin starts using it.
-* `<div property="ext:intentionUri">http://person/name</div>` is the variable which can occur on multiple places in document.
-* You are in charge of making sure `<div property="ext:idInSnippet">foo</div>` and ` id="foo"` are in sync and unique.
-* `<div property="ext:intentionUri">http://person/name</div>` can be shared across templates
+* `<div property="ext:intentionUri" content="http://person/name">http://person/name</div>` is the variable which can occur on multiple places in document.
+* You are in charge of making sure `<div property="ext:idInSnippet" content="foo">foo</div>` and ` id="foo"` are in sync and unique.
+* `<div property="ext:intentionUri" content="http://person/name">http://person/name</div>` can be shared across templates
 * Currently, in most of the editor cases, template-plugin will make sure ID's are managed.
 * `class="ext_variable"` is optional, but makes your variables invisible
 
