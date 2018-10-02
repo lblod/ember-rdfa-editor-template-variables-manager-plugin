@@ -14,8 +14,6 @@ import { isArray } from '@ember/array';
  */
 const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
 
-  variablesStore: null,
-
   init(){
     this._super(...arguments);
   },
@@ -83,11 +81,17 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     return this.updateVariableInstances(editor, variablesToUpdate.slice(1), updatedNode);
   },
 
+  /**
+   * Given updated node content with updated Node
+   * @param {Object} editor
+   * @param {Array} DomNode
+   * @param {Object} DomNode with 'ground truth'
+   */
   updateVariableInstance(editor, updatedNode, nodeToUpdate){
     //TODO: delete old node
-    //TODO: could duplicate ID be a problem...?
     let newNode = updatedNode.cloneNode(true);
     newNode.id = nodeToUpdate.id;
+    nodeToUpdate.removeAttribute("id"); //makes sure no duplicate id's
     editor.replaceNodeWithHTML(nodeToUpdate, newNode.outerHTML, false, [ this ]);
   },
 
