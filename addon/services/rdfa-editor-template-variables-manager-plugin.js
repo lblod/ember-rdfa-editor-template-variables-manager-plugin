@@ -34,22 +34,23 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
    * @public
    */
   execute: task(function * (hrId, contexts, hintsRegistry, editor, extraInfo = []) {
-    //TODO: avoid memory leak, manage store better
     if (contexts.length === 0) return [];
 
     //For performance, let's wait for everything to settle down. (Assumes restartable task!)
+    //TODO: there is an issue with nodes removed before being processed by this plugin
     yield timeout(200);
 
     //if we see event was triggered by this plugin, ignore it
     if(extraInfo.find(i => i && i.who == "editor-plugins/template-variables-manager-card"))
       return [];
 
-
     let variablesBlock = this.fetchOrCreateVariablesBlock(editor);
 
     this.moveVariableMetaToMetaBlock(editor, variablesBlock);
 
     let flatVariableData = this.flatVariableInstanceData(editor);
+
+    flatVariableData = this.cleanUpNullReferenceVariables(editor, flatVariableData);
 
     flatVariableData = this.syncIntializedVariables(editor, flatVariableData);
 
@@ -113,6 +114,24 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     newNode.id = nodeToUpdate.id;
     nodeToUpdate.removeAttribute("id"); //makes sure no duplicate id's
     editor.replaceNodeWithHTML(nodeToUpdate, newNode.outerHTML, false, [ this ]);
+  },
+
+  /**
+   * Clean up null reference variables
+   * @param {Object} editor
+   * @param {Array} [{variableInstance, variableMeta}]
+   * @return {Array} up to date [{intentionUri, variableState, variableInstance, variableMeta}]
+   */
+  cleanUpNullReferenceVariables(editor, flatVariableData){
+    return flatVariableData.reduce((acc, v) => {
+      if(!v.variableInstance){
+        editor.removeNode(v.variableMeta, [ this ]);
+      }
+      else{
+        acc.push(v);
+      }
+      return acc;
+    }, []);
   },
 
   /**
