@@ -24,9 +24,11 @@ Variables are defined in template as:
 <div typeof="http://www.w3.org/ns/person#Person" resource="http://a/random/uri">
   <div>
    Name:
-     <span id="foo" property="http://xmlns.com/foaf/0.1/familyName" datatype="http://www.w3.org/2001/XMLSchema#string">
-       John Doe
-     </span>
+     <div id="foo" property="ext:variableInstanceContainer">
+       <span property="http://xmlns.com/foaf/0.1/familyName" datatype="http://www.w3.org/2001/XMLSchema#string">
+         John Doe
+       </span>
+     </div>
   </div>
 </div>
 ```
