@@ -50,9 +50,6 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
 
     let flatVariableData = this.flatVariableInstanceData(editor);
 
-    if(flatVariableData.length > 0)
-      debugger;
-
     flatVariableData = this.cleanUpNullReferenceVariables(editor, flatVariableData);
 
     flatVariableData = this.syncIntializedVariables(editor, flatVariableData);
