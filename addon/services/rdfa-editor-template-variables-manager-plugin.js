@@ -41,8 +41,9 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     yield timeout(200);
 
     //if we see event was triggered by this plugin, ignore it
-    if(extraInfo.find(i => i && i.who == "editor-plugins/template-variables-manager-card"))
+    if(extraInfo.find(i => i && i.who == "editor-plugins/template-variables-manager-card")){
       return [];
+    }
 
     let variablesBlock = this.fetchOrCreateVariablesBlock(editor);
 
@@ -65,7 +66,6 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
           let variablesToUpdate = flatVariableData
                 .filter(d => d.intentionUri == variableData.intentionUri)
                 .map(d => d.variableInstance);
-
           this.updateVariableInstances(editor, variablesToUpdate, variableData.variableInstance);
         }
       });
@@ -95,11 +95,28 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
 
     let nodeToUpdate = variablesToUpdate[0];
 
-    if(!nodeToUpdate.isSameNode(updatedNode)){
+    if(!nodeToUpdate.isSameNode(updatedNode) && this.areDomNodesDifferent([ ...updatedNode.childNodes ], [ ...nodeToUpdate.childNodes ])){
       this.updateVariableInstance(editor, updatedNode, nodeToUpdate);
     }
 
     return this.updateVariableInstances(editor, variablesToUpdate.slice(1), updatedNode);
+  },
+
+  /**
+   * Checks wether arrays of domNodes are different.
+   * @param {Array} [ DomNode ]
+   * @param {Array} [ DomNode ]
+   *
+   * @return {Bool}
+   */
+  areDomNodesDifferent(nodesA, nodesB){
+    if(nodesA.length !== nodesB.length)
+      return true;
+    if(nodesA.length == 0)
+      return false;
+    if(!nodesA[0].isEqualNode(nodesB[0]))
+      return true;
+    return this.areDomNodesDifferent(nodesA.slice(1), nodesB.slice(1));
   },
 
   /**
