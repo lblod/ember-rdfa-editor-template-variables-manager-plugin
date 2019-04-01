@@ -99,7 +99,11 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
       this.updateVariableInstance(editor, updatedNode, nodeToUpdate);
     }
 
-    return this.updateVariableInstances(editor, variablesToUpdate.slice(1), updatedNode);
+    let nextVariables = variablesToUpdate.slice(1);
+    if( nextVariables.length === 0 )
+      editor.updateSelectionAfterComplexInput(); // TODO: provide abstraction in editor
+
+    return this.updateVariableInstances(editor, nextVariables, updatedNode);
   },
 
   /**
