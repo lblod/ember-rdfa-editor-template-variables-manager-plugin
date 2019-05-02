@@ -38,8 +38,6 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
 
     //For performance, let's wait for everything to settle down. (Assumes restartable task!)
     //TODO: there is an issue with nodes removed before being processed by this plugin
-    yield timeout(200);
-
     //if we see event was triggered by this plugin, ignore it
     if(extraInfo.find(i => i && i.who == "editor-plugins/template-variables-manager-card")){
       return [];
@@ -71,7 +69,7 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
       });
     });
 
-  }).restartable(),
+  }),
 
   /**
    * Given changed node, find variable instance it belongs to.
