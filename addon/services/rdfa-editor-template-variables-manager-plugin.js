@@ -4,10 +4,32 @@ import { isArray } from '@ember/array';
 
 /**
  * Service responsible for managing variables in templates.
- * General implementation notes:
- * - This plugin will make sure there is a meta data block in the document. Where all variable metadata will be moved.
- * - This block is not contenteditable and invisible.
- * - Flow is: look for new variables, move them to block, if new sync them with exisiting variables, update them with newest content.
+ * ---------------------------------------------------
+ * CODE REVIEW NOTES
+ * ---------------------------------------------------
+ *
+ *  INTERACTION PATTERNS
+ *  --------------------
+ *  A variable is defined with a metadata element wich points to a element wich needs to be tracked.
+ *  (see README for the exact details).
+ *
+ *  The flow is:
+ *  - the metadata elements belong in a metadata block in the top of the document.
+ *  - the metadata block is created if not existant.
+ *  - look for new variables metadata element, move them to block.
+    - if a variable is in  an initialized state, sync them with exisiting variables, update them with newest content.
+ *
+ *  POTENTIAL ISSUES/TODO
+ *  ---------------------
+ *  - The interaction pattern of moving metadata nodes to metadata block, creating a metadata block if non existant, etc.
+ *    Is occuring by directly scanning the DOM and not trough the editor. Which could be considered as abstraction leakage.
+ *    The main reason doing so is to avoid wokring on dead dom nodes
+ *  - TODO: reconsider the restartable task. (Even though it scans the whole document on change)
+ *  - Basically, the exec function works with outdated information. The domNodes provides, might have changed before this plugin starts
+ *    working.
+ * ---------------------------------------------------
+ * END CODE REVIEW NOTES
+ * ---------------------------------------------------
  *
  * @module editor-template-variables-manager-plugin
  * @class RdfaEditorTemplateVariablesManagerPlugin
@@ -97,7 +119,11 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
       this.updateVariableInstance(editor, updatedNode, nodeToUpdate);
     }
 
-    return this.updateVariableInstances(editor, variablesToUpdate.slice(1), updatedNode);
+    let nextVariables = variablesToUpdate.slice(1);
+    if( nextVariables.length === 0 )
+      editor.updateSelectionAfterComplexInput(); // TODO: provide abstraction in editor
+
+    return this.updateVariableInstances(editor, nextVariables, updatedNode);
   },
 
   /**
