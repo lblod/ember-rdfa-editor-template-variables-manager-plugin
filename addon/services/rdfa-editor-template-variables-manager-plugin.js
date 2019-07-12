@@ -76,7 +76,7 @@ const RdfaEditorTemplateVariablesManagerPlugin = Service.extend({
     flatVariableData = this.syncIntializedVariables(editor, flatVariableData);
 
     contexts.forEach((context) => {
-      let richNodes = isArray(context.richNode)? context.richNode : [ context.richNode ];
+      let richNodes = context.richNodes;
 
       richNodes.filter(richN => richN.domNode).forEach(richNode => {
         let variableData = this.findDomVariableInstanceForchangedNode(flatVariableData, richNode.domNode);
